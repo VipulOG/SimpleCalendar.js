@@ -22,6 +22,10 @@ body {
   flex-direction: row;
 }
 
+.selected-date-info {
+  background-image: url("/images/bg.webp");
+}
+
 .month-selector {
   display: flex;
   align-items: center;

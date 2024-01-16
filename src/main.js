@@ -2,66 +2,112 @@ class SimpleCalendar {
   container;
   today;
   selectedDate;
+  renderedMonth;
 
   constructor(selector) {
     this.today = new Date();
     this.renderedMonth = new Date();
     this.selectedDate = new Date();
+
     this.container = document.querySelector(selector);
+
+    this.buildSelectedDateInfo();
     this.buildCalender();
+  }
+
+  buildSelectedDateInfo() {
+    const self = this;
+    const container = document.createElement("div");
+    container.classList.add("selected-date-info");
+
+    self.container.addEventListener("selectDate", (event) => {});
+
+    function buildSelectedDate() {
+      var selectedDateContainer = container.querySelector("selected-date");
+
+      if (selectedDateContainer) {
+        selectedDateContainer.innerHTML = "";
+      } else {
+        selectedDateContainer = document.createElement("div");
+        selectedDateContainer.classList.add("selected-date");
+        container.appendChild(selectedDateContainer);
+      }
+
+      const selectedMonth = document.createElement("div");
+      const selectedDay = document.createElement("div");
+      selectedDateContainer.appendChild(selectedMonth);
+      selectedDateContainer.appendChild(selectedDay);
+      container.appendChild(selectedDateContainer);
+    }
+
+    function buildEventsList() {
+      const eventsList = document.createElement("div");
+      container.appendChild(eventsList);
+    }
+
+    buildSelectedDate();
+    buildEventsList();
+    self.container.appendChild(container);
   }
 
   buildCalender() {
     const self = this;
-    const calenderWrapper = document.createElement("div");
+    const container = document.createElement("div");
     const calenderTable = document.createElement("table");
+
+    self.container.addEventListener("switchMonth", (event) => {
+      destroyBody();
+      buildBody();
+    });
+
+    self.container.addEventListener("selectDate", (event) => {
+      const selectedDate = calenderTable.querySelector(".day.selected");
+      if (selectedDate) {
+        selectedDate.classList.remove("selected");
+      }
+      calenderTable.querySelectorAll(".day")[event.detail.date.getDate() - 1].classList.add("selected");
+    });
 
     function buildMonthSelector() {
       const monthSelector = document.createElement("div");
       monthSelector.classList.add("month-selector");
-      calenderWrapper.appendChild(monthSelector);
+      container.appendChild(monthSelector);
 
       const prevMonthButton = document.createElement("button");
       prevMonthButton.textContent = "<";
+      monthSelector.appendChild(prevMonthButton);
+
       prevMonthButton.addEventListener("click", () => {
         self.renderedMonth = new Date(
           self.renderedMonth.getFullYear(),
           self.renderedMonth.getMonth() - 1,
           1
         );
-        updateCurrentMonthLabel();
-        buildBody();
-      });
-      monthSelector.appendChild(prevMonthButton);
 
-      const monthLabel = document.createElement("span");
-      monthLabel.textContent = new Date(
-        self.renderedMonth.getFullYear(),
-        self.renderedMonth.getMonth(),
-        1
-      ).toLocaleDateString("default", { month: "long", year: "numeric" });
-      monthSelector.appendChild(monthLabel);
+        self.container.dispatchEvent(
+          new CustomEvent("switchMonth", {
+            detail: { date: self.renderedMonth },
+          })
+        );
+      });
 
       const nextMonthButton = document.createElement("button");
       nextMonthButton.textContent = ">";
+      monthSelector.appendChild(nextMonthButton);
+
       nextMonthButton.addEventListener("click", () => {
         self.renderedMonth = new Date(
           self.renderedMonth.getFullYear(),
           self.renderedMonth.getMonth() + 1,
           1
         );
-        updateCurrentMonthLabel();
-        buildBody();
-      });
-      monthSelector.appendChild(nextMonthButton);
 
-      function updateCurrentMonthLabel() {
-        monthLabel.textContent = new Date(
-          self.renderedMonth.getFullYear(),
-          self.renderedMonth.getMonth(),
-          1
-        ).toLocaleDateString("default", { month: "long", year: "numeric" });
-      }
+        self.container.dispatchEvent(
+          new CustomEvent("switchMonth", {
+            detail: { date: self.renderedMonth },
+          })
+        );
+      });
     }
 
     function buildHeader() {
@@ -79,14 +125,16 @@ class SimpleCalendar {
       });
     }
 
-    function buildBody() {
-      var body = calenderTable.querySelector("tbody");
+    function destroyBody() {
+      const body = calenderTable.querySelector("tbody");
       if (body) {
-        body.innerHTML = "";
-      } else {
-        body = document.createElement("tbody");
-        calenderTable.appendChild(body);
+        body.parentNode.removeChild(body);
       }
+    }
+
+    function buildBody() {
+      const body = document.createElement("tbody");
+      calenderTable.appendChild(body);
 
       const daysInMonth = new Date(
         self.renderedMonth.getFullYear(),
@@ -119,10 +167,12 @@ class SimpleCalendar {
 
     function buildDayCell(day) {
       const cell = document.createElement("div");
+
       const isSelected =
         self.renderedMonth.getMonth() === self.selectedDate.getMonth() &&
         self.renderedMonth.getFullYear() === self.selectedDate.getFullYear() &&
         self.selectedDate.getDate() === day;
+
       const isToday =
         self.renderedMonth.getMonth() === self.today.getMonth() &&
         self.renderedMonth.getFullYear() === self.today.getFullYear() &&
@@ -141,19 +191,24 @@ class SimpleCalendar {
 
     function selectDay(day) {
       self.selectedDate = new Date(
-        self.today.getFullYear(),
-        self.today.getMonth(),
+        self.renderedMonth.getFullYear(),
+        self.renderedMonth.getMonth(),
         day
       );
-      buildBody();
+
+      self.container.dispatchEvent(
+        new CustomEvent("selectDate", {
+          detail: { date: self.selectedDate },
+        })
+      );
     }
 
     buildMonthSelector();
     buildHeader();
     buildBody();
 
-    calenderWrapper.appendChild(calenderTable);
-    self.container.appendChild(calenderWrapper);
+    container.appendChild(calenderTable);
+    self.container.appendChild(container);
   }
 }
 
