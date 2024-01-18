@@ -3,12 +3,14 @@ class SimpleCalendar {
   today;
   selectedDate;
   renderedMonth;
+  events;
 
-  constructor(selector) {
+  constructor(selector, events) {
     this.today = new Date();
     this.renderedMonth = new Date();
     this.selectedDate = new Date();
 
+    this.events = events || [];
     this.container = document.querySelector(selector);
 
     this.buildSelectedDateInfo();
@@ -21,15 +23,9 @@ class SimpleCalendar {
     const container = document.createElement("div");
     container.classList.add("selected-date-info");
 
-    var selectedDay;
-    var selectedMonth;
-
     self.container.addEventListener("selectDate", (event) => {
-      selectedMonth.textContent = event.detail.date.toLocaleString("default", {
-        month: "long",
-        year: "numeric",
-      });
-      selectedDay.textContent = event.detail.date.getDate();
+      clearEventsList();
+      buildEventsList();
     });
 
     function buildTodayButton() {
@@ -59,10 +55,18 @@ class SimpleCalendar {
       selectedDateContainer.classList.add("selected-date");
       container.appendChild(selectedDateContainer);
 
-      selectedMonth = document.createElement("div");
-      selectedDay = document.createElement("div");
+      const selectedMonth = document.createElement("div");
+      const selectedDay = document.createElement("div");
       selectedMonth.id = "selected-month";
       selectedDay.id = "selected-day";
+
+      self.container.addEventListener("selectDate", (event) => {
+        selectedMonth.textContent = event.detail.date.toLocaleString(
+          "default",
+          { month: "long", year: "numeric" }
+        );
+        selectedDay.textContent = event.detail.date.getDate();
+      });
 
       selectedMonth.textContent = self.selectedDate.toLocaleString("default", {
         month: "long",
@@ -76,9 +80,43 @@ class SimpleCalendar {
       container.appendChild(selectedDateContainer);
     }
 
+    function clearEventsList() {
+      const eventsList = container.querySelector(".events-list");
+      const eventsList2 = self.container.querySelector(".events-list.variant");
+      if (eventsList) eventsList.remove();
+      if (eventsList2) eventsList2.remove();
+    }
+
     function buildEventsList() {
       const eventsList = document.createElement("div");
+      eventsList.classList.add("events-list");
       container.appendChild(eventsList);
+
+      self.events.forEach((event) => {
+        if (
+          event.date.getMonth() === self.selectedDate.getMonth() &&
+          event.date.getFullYear() === self.selectedDate.getFullYear() &&
+          event.date.getDate() === self.selectedDate.getDate()
+        ) {
+          const eventItem = document.createElement("div");
+          eventItem.classList.add("event-item");
+
+          const eventTitle = document.createElement("div");
+          eventTitle.classList.add("event-title");
+          eventTitle.textContent = event.title;
+          eventItem.appendChild(eventTitle);
+
+          const eventTime = document.createElement("div");
+          eventTime.classList.add("event-time");
+          eventTime.textContent = event.time;
+          eventItem.appendChild(eventTime);
+          eventsList.appendChild(eventItem);
+        }
+      });
+
+      const eventListVariant = eventsList.cloneNode(true);
+      eventListVariant.classList.add("variant");
+      self.container.appendChild(eventListVariant);
     }
 
     buildTodayButton();
@@ -133,6 +171,20 @@ class SimpleCalendar {
         );
       });
 
+      const label = document.createElement("p");
+      label.textContent = self.renderedMonth.toLocaleString("default", {
+        month: "long",
+        year: "numeric",
+      });
+      monthSwitch.appendChild(label);
+
+      self.container.addEventListener("switchMonth", (event) => {
+        label.textContent = event.detail.date.toLocaleString("default", {
+          month: "long",
+          year: "numeric",
+        });
+      });
+
       const nextMonthButton = document.createElement("button");
       nextMonthButton.textContent = ">";
       monthSwitch.appendChild(nextMonthButton);
@@ -171,7 +223,7 @@ class SimpleCalendar {
       const body = document.createElement("tbody");
       calenderTable.appendChild(body);
 
-      for (let i = 0; i < 7; i++) {
+      for (let i = 0; i < 6; i++) {
         const row = document.createElement("tr");
         for (let j = 0; j < 7; j++) {
           const cell = document.createElement("td");
@@ -252,7 +304,43 @@ class SimpleCalendar {
 
     container.appendChild(calenderTable);
     self.container.appendChild(container);
+
+    // move events list variant to the end of the container
+    const eventsList2 = self.container.querySelector(".events-list.variant");
+    if (eventsList2) self.container.appendChild(eventsList2);
   }
 }
 
-const myCalendar = new SimpleCalendar("#calendarContainer");
+const myCalendar = new SimpleCalendar("#calendarContainer", [
+  {
+    title: "Meeting with John",
+    time: "10:00 AM",
+    date: new Date(2024, 0, 10),
+  },
+  {
+    title: "Dinner with family",
+    time: "7:00 PM",
+    date: new Date(2024, 0, 18),
+  },
+  {
+    title: "Meeting with John",
+    time: "10:00 AM",
+    date: new Date(2024, 0, 18),
+  },
+  {
+    title: "Appointment with dentist",
+    time: "3:00 PM",
+    date: new Date(2024, 0, 18),
+  },
+
+  {
+    title: "Dinner with family",
+    time: "7:00 PM",
+    date: new Date(2024, 0, 18),
+  },
+  {
+    title: "Dinner with family",
+    time: "7:00 PM",
+    date: new Date(2024, 0, 18),
+  },
+]);
