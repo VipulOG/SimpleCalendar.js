@@ -14,7 +14,7 @@ Original template by Colorlib: [Live Preview](https://preview.colorlib.com/theme
 
 - Neat and responsive date display.
 - Fully mobile-ready for a seamless user experience.
-- No external libraries used, just pure JavaScript.
+- No external dependencies used, just pure JavaScript.
 
 ## Acknowledgments
 
