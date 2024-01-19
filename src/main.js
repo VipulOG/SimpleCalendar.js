@@ -17,6 +17,13 @@ class SimpleCalendar {
     this.buildCalender();
   }
 
+  addEvent(event) {
+    this.events.push(event);
+    this.container.dispatchEvent(
+      new CustomEvent("eventAdded", { detail: { event } })
+    );
+  }
+
   buildSelectedDateInfo() {
     const self = this;
 
@@ -24,6 +31,11 @@ class SimpleCalendar {
     container.classList.add("selected-date-info");
 
     self.container.addEventListener("selectDate", (event) => {
+      clearEventsList();
+      buildEventsList();
+    });
+
+    self.container.addEventListener("eventAdded", (event) => {
       clearEventsList();
       buildEventsList();
     });
