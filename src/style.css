@@ -33,7 +33,7 @@ body {
 
 .selected-date-info {
   color: #fff;
-  background-image: url("/images/bg.webp");
+  background-image: url("../images/bg.webp");
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center center;
