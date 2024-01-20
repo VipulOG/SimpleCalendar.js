@@ -167,6 +167,7 @@ class SimpleCalendar {
 
       const prevMonthButton = document.createElement("button");
       prevMonthButton.textContent = "<";
+      prevMonthButton.type = "button";
       monthSwitch.appendChild(prevMonthButton);
 
       prevMonthButton.addEventListener("click", () => {
@@ -199,6 +200,7 @@ class SimpleCalendar {
 
       const nextMonthButton = document.createElement("button");
       nextMonthButton.textContent = ">";
+      nextMonthButton.type = "button";
       monthSwitch.appendChild(nextMonthButton);
 
       nextMonthButton.addEventListener("click", () => {
