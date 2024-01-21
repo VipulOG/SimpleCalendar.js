@@ -20,8 +20,44 @@ class SimpleCalendar {
   addEvent(event) {
     this.events.push(event);
     this.container.dispatchEvent(
-      new CustomEvent("eventAdded", { detail: { event } })
+      new CustomEvent("eventsAdded", { detail: { event } })
     );
+  }
+
+  removeEvent(event) {
+    const index = this.events.indexOf(event);
+    if (index > -1) {
+      this.events.splice(index, 1);
+      this.container.dispatchEvent(
+        new CustomEvent("eventsRemoved", { detail: { event } })
+      );
+    }
+  }
+
+  addEvents(events) {
+    events.forEach((event) => {
+      this.events.push(event);
+    });
+    this.container.dispatchEvent(
+      new CustomEvent("eventsAdded", { detail: { events } })
+    );
+  }
+
+  removeEvents(events) {
+    events.forEach((event) => {
+      const index = this.events.indexOf(event);
+      if (index > -1) {
+        this.events.splice(index, 1);
+      }
+    });
+    this.container.dispatchEvent(
+      new CustomEvent("eventsRemoved", { detail: { events } })
+    );
+  }
+
+  removeAllEvents() {
+    this.events = [];
+    this.container.dispatchEvent(new CustomEvent("eventsRemoved"));
   }
 
   buildSelectedDateInfo() {
@@ -35,7 +71,12 @@ class SimpleCalendar {
       buildEventsList();
     });
 
-    self.container.addEventListener("eventAdded", (event) => {
+    self.container.addEventListener("eventsAdded", (event) => {
+      clearEventsList();
+      buildEventsList();
+    });
+
+    self.container.addEventListener("eventsRemoved", (event) => {
       clearEventsList();
       buildEventsList();
     });
